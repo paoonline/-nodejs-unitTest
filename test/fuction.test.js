@@ -1,4 +1,4 @@
-import {up, calTriangle, fetchSomeData, login} from '../function/cal'
+import { up, calTriangle, fetchSomeData, login } from '../function/cal'
 import calindex from '../function/cal'
 import request from 'supertest'
 import Appindex from '../index'
@@ -27,7 +27,7 @@ describe('test', () => {
   })
 
   it('should login', async () => {
-    const isLoggedIn = await calindex.login()
+    const isLoggedIn = await login()
     expect(isLoggedIn).toBe(true)
   })
 
@@ -39,19 +39,47 @@ describe('test', () => {
     calindex.fetchSomeData.mockRestore()
   })
 
-  //integration test
-  // it('test api 1', async () => {
-  //   const res = await request(Appindex)
-  //     .get('/product_list')
-  //   expect(res.statusCode).toEqual(200)
-  //   expect(res.body.length).toBeGreaterThan(0)
-  // })
+  test('mock test api', async () => {
+    const mockUrl = '/product_list';
+    const mockProduct = [{
+      imagePath: '',
+      _id: '5e0c1c7d42a16702a061c4d5',
+      productName: '12',
+      productModify: '2020-01-04T06:24:33.848Z',
+      productQuantity: 11,
+      __v: 0
+    }];
+    const getProduct = jest.fn((url) => mockProduct)
+    expect(getProduct(mockUrl)).toBe(mockProduct)
 
-  // it('test api 2', async () => {
-  //   const res = await request(Appindex)
-  //     .get('/product_listById?_id=5e0b821250cad103b54194de')
-  //   expect(res.statusCode).toEqual(200)
-  //   expect(res.body.productName).toEqual('1')
-  // })
+  })
+
+  test('test api status', async () => {
+    const res_success = await request(Appindex)
+      .get('/product_list?status=true')
+
+    const res_fail = await request(Appindex)
+      .get('/product_list?status=false')
+
+    expect(res_success.statusCode).toEqual(200)
+    expect(res_success.body.status).toEqual(true)
+    expect(res_fail.statusCode).toEqual(400)
+    expect(res_fail.body.status).toEqual(false)
+  })
+
+  // integration test
+  it('test api 1', async () => {
+    const res = await request(Appindex)
+      .get('/product_list')
+    expect(res.statusCode).toEqual(200)
+    expect(res.body.length).toBeGreaterThan(0)
+  })
+
+  it('test api 2', async () => {
+    const res = await request(Appindex)
+      .get('/product_listById?_id=5e0b821250cad103b54194de')
+    expect(res.statusCode).toEqual(200)
+    expect(res.body.productName).toEqual('1')
+  })
 
 })
